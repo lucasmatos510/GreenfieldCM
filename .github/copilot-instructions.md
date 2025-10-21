@@ -97,3 +97,13 @@ Sistema website automatizado/
 - ✅ Hover effects aprimorados
 
 O sistema está pronto para uso em produção com interface moderna e otimizada!
+
+## 🔗 **Repositório GitHub Publicado:**
+- **URL**: https://github.com/lucasmatos510/GreenfieldCM
+- **Branch**: main
+- **Status**: ✅ Publicado e sincronizado
+
+## 🚀 **Deploy no Render:**
+1. **Conecte** repositório GitHub no Render
+2. **Configure** conforme RENDER_DEPLOY.md
+3. **Deploy** automático ativado

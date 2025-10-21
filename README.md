@@ -111,6 +111,8 @@ Sistema completo e moderno para gestão automatizada de banco de horas com inter
 ### 🚀 **Deploy no Render (Recomendado para Produção)**
 O sistema está **100% configurado** para deploy automático no Render:
 
+**Repositório GitHub**: https://github.com/lucasmatos510/GreenfieldCM
+
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com)
 
 **Arquivos de configuração inclusos:**
@@ -281,10 +283,10 @@ MIT License - Projeto de código aberto para gestão de banco de horas.
 
 ## 👥 Suporte e Contribuição
 
-- 🐛 **Issues**: Reporte bugs via GitHub Issues
-- 💡 **Features**: Sugira melhorias via Pull Requests  
+- 🐛 **Issues**: [Reporte bugs via GitHub Issues](https://github.com/lucasmatos510/GreenfieldCM/issues)
+- 💡 **Features**: [Sugira melhorias via Pull Requests](https://github.com/lucasmatos510/GreenfieldCM/pulls)  
 - 📧 **Suporte**: Consulte a documentação ou logs do Render
-- 🔧 **Desenvolvimento**: Fork, modifique e contribua!
+- 🔧 **Desenvolvimento**: [Fork do repositório](https://github.com/lucasmatos510/GreenfieldCM/fork), modifique e contribua!
 
 ---
 
