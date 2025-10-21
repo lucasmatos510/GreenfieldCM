@@ -8,10 +8,9 @@ from flask import Flask, render_template, redirect, url_for, session
 import os
 import logging
 from datetime import datetime
-from dotenv import load_dotenv
 
-# Carregar variáveis de ambiente
-load_dotenv()
+# Variáveis de ambiente são carregadas automaticamente pelo sistema
+# No Render, as environment variables são injetadas automaticamente
 
 def create_app():
     """Factory function para criar a aplicação Flask otimizada para Render"""
