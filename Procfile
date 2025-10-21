@@ -1,1 +1,1 @@
-web: gunicorn --workers=1 --timeout=300 --keep-alive=2 --bind=0.0.0.0:$PORT wsgi:app
+web: gunicorn --workers=1 --timeout=300 --keep-alive=2 --bind=0.0.0.0:$PORT main:app
