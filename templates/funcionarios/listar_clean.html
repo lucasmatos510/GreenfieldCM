@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Funcionários - Sistema de Banco de Horas{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="text-secondary"><i class="fas fa-users me-2"></i>Funcionários</h2>
+            <p class="text-muted">Gerenciar colaboradores da empresa</p>
+        </div>
+        <a href="{{ url_for('main.novo_funcionario') }}" class="btn btn-primary">
+            <i class="fas fa-user-plus me-2"></i>Novo Funcionário
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>Funcionários Ativos ({{ funcionarios|length }})
+                </h5>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('main.gerenciar_cargos') }}" class="btn btn-sm btn-outline-warning">
+                        <i class="fas fa-briefcase me-1"></i>Gerenciar Cargos
+                    </a>
+                    <a href="{{ url_for('main.gerenciar_areas') }}" class="btn btn-sm btn-outline-info">
+                        <i class="fas fa-building me-1"></i>Gerenciar Áreas
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if funcionarios %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th><i class="fas fa-user me-2"></i>Nome</th>
+                                    <th><i class="fas fa-briefcase me-2"></i>Cargo</th>
+                                    <th><i class="fas fa-building me-2"></i>Área</th>
+                                    <th><i class="fas fa-clock me-2"></i>Horas este Mês</th>
+                                    <th><i class="fas fa-calendar me-2"></i>Cadastrado</th>
+                                    <th><i class="fas fa-cogs me-2"></i>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for funcionario in funcionarios %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                                 style="width: 32px; height: 32px;">
+                                                <i class="fas fa-user text-white"></i>
+                                            </div>
+                                            <strong>{{ funcionario.nome }}</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if funcionario.cargo %}
+                                            <span class="badge bg-warning text-dark">{{ funcionario.cargo.nome }}</span>
+                                        {% else %}
+                                            <span class="text-muted">Sem cargo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if funcionario.area %}
+                                            <span class="badge bg-info">{{ funcionario.area.nome }}</span>
+                                        {% else %}
+                                            <span class="text-muted">Sem área</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            {% set horas_mes = funcionario.registros_horas|selectattr('data', 'ge', primeiro_dia_mes)|sum(attribute='horas') or 0 %}
+                                            {{ "%.1f"|format(horas_mes) }}h
+                                        </span>
+                                    </td>
+                                    <td>{{ funcionario.data_criacao.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ url_for('main.registrar_horas') }}?funcionario_id={{ funcionario.id }}" 
+                                               class="btn btn-outline-success" title="Registrar Horas">
+                                                <i class="fas fa-clock"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-outline-primary btn-editar-funcionario" 
+                                                    data-id="{{ funcionario.id }}"
+                                                    data-nome="{{ funcionario.nome }}"
+                                                    data-cargo="{{ funcionario.cargo_id or '' }}"
+                                                    data-area="{{ funcionario.area_id or '' }}"
+                                                    title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-excluir-funcionario"
+                                                    data-id="{{ funcionario.id }}"
+                                                    data-nome="{{ funcionario.nome }}"
+                                                    title="Excluir">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">Nenhum funcionário cadastrado</h4>
+                        <p class="text-muted">Comece cadastrando o primeiro funcionário</p>
+                        <a href="{{ url_for('main.novo_funcionario') }}" class="btn btn-primary">
+                            <i class="fas fa-user-plus me-2"></i>Cadastrar Primeiro Funcionário
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Funcionário -->
+<div class="modal fade" id="editarFuncionarioModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-user-edit me-2"></i>Editar Funcionário</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('main.editar_funcionario') }}" id="editarFuncionarioForm">
+                <input type="hidden" id="edit_funcionario_id" name="funcionario_id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_nome_funcionario" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="edit_nome_funcionario" name="nome" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_cargo_funcionario" class="form-label">Cargo</label>
+                        <select class="form-select" id="edit_cargo_funcionario" name="cargo_id">
+                            <option value="">Sem cargo específico</option>
+                            {% for cargo in cargos %}
+                            <option value="{{ cargo.id }}">{{ cargo.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_area_funcionario" class="form-label">Área</label>
+                        <select class="form-select" id="edit_area_funcionario" name="area_id">
+                            <option value="">Sem área específica</option>
+                            {% for area in areas %}
+                            <option value="{{ area.id }}">{{ area.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Event listeners para botões de editar
+    document.querySelectorAll('.btn-editar-funcionario').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const nome = this.dataset.nome;
+            const cargoId = this.dataset.cargo;
+            const areaId = this.dataset.area;
+            
+            document.getElementById('edit_funcionario_id').value = id;
+            document.getElementById('edit_nome_funcionario').value = nome;
+            document.getElementById('edit_cargo_funcionario').value = cargoId || '';
+            document.getElementById('edit_area_funcionario').value = areaId || '';
+            
+            const modal = new bootstrap.Modal(document.getElementById('editarFuncionarioModal'));
+            modal.show();
+        });
+    });
+    
+    // Event listeners para botões de excluir
+    document.querySelectorAll('.btn-excluir-funcionario').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const nome = this.dataset.nome;
+            
+            if (confirm(`Tem certeza que deseja excluir o funcionário "${nome}"?\n\nTodos os registros de horas serão mantidos para histórico, mas o funcionário ficará inativo.`)) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ url_for("main.excluir_funcionario") }}';
+                
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'funcionario_id';
+                input.value = id;
+                
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    });
+});
+</script>
+
+{% endblock %}

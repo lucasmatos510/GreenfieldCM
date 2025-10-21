@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Horas Extras - Sistema de Banco de Horas{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="text-success"><i class="fas fa-clock me-2"></i>Registrar Horas Extras</h2>
+        <p class="text-muted">Lançamento simplificado de horas extras trabalhadas</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Novo Registro</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('main.processar_registro_horas') }}">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="funcionario_id" class="form-label">Funcionário</label>
+                            <select class="form-select form-select-lg" id="funcionario_id" name="funcionario_id" required>
+                                <option value="">Selecione o funcionário</option>
+                                {% for funcionario in funcionarios %}
+                                <option value="{{ funcionario.id }}">
+                                    {{ funcionario.nome }} - {{ funcionario.cargo.nome if funcionario.cargo else 'Sem cargo' }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="data" class="form-label">Data</label>
+                            <input type="date" class="form-control" id="data" name="data" 
+                                   value="{{ data_atual }}" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="horas" class="form-label">Horas</label>
+                            <input type="number" class="form-control" id="horas" name="horas" 
+                                   min="0" max="24" step="1" placeholder="Ex: 2" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="minutos" class="form-label">Minutos</label>
+                            <input type="number" class="form-control" id="minutos" name="minutos" 
+                                   min="0" max="59" step="1" value="0" placeholder="Ex: 30">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="observacoes" class="form-label">Observações</label>
+                        <textarea class="form-control" id="observacoes" name="observacoes" 
+                                  rows="3" placeholder="Descreva as atividades realizadas nas horas extras..."></textarea>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Voltar
+                        </a>
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-save me-2"></i>Registrar Horas Extras
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lista de Funcionários -->
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-users me-2"></i>Funcionários ({{ funcionarios|length }})</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush" style="max-height: 400px; overflow-y: auto;">
+                    {% for funcionario in funcionarios %}
+                    <div class="list-group-item funcionario-item" 
+                         data-id="{{ funcionario.id }}" style="cursor: pointer;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ funcionario.nome }}</h6>
+                                <small class="text-muted">
+                                    {{ funcionario.cargo.nome if funcionario.cargo else 'Sem cargo' }}
+                                </small>
+                            </div>
+                            <i class="fas fa-chevron-right text-muted"></i>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Registros de Hoje -->
+{% if registros_hoje %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i>Registros de Hoje</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Funcionário</th>
+                                <th>Horas</th>
+                                <th>Observações</th>
+                                <th>Registrado em</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for registro in registros_hoje %}
+                            <tr>
+                                <td><strong>{{ registro.funcionario.nome }}</strong></td>
+                                <td><span class="badge bg-success fs-6">{{ "%.1f"|format(registro.horas) }}h</span></td>
+                                <td>{{ registro.observacoes or '-' }}</td>
+                                <td>{{ registro.created_at.strftime('%H:%M') if registro.created_at else '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Clique nos funcionários da lista
+    document.querySelectorAll('.funcionario-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const id = this.dataset.id;
+            document.getElementById('funcionario_id').value = id;
+            
+            // Destacar selecionado
+            document.querySelectorAll('.funcionario-item').forEach(el => 
+                el.classList.remove('bg-light'));
+            this.classList.add('bg-light');
+            
+            // Focar no campo de horas
+            document.getElementById('horas').focus();
+        });
+    });
+    
+    // Auto-cálculo do total em tempo real
+    function atualizarTotal() {
+        const horas = parseInt(document.getElementById('horas').value || 0);
+        const minutos = parseInt(document.getElementById('minutos').value || 0);
+        const total = horas + (minutos / 60);
+        
+        if (total > 0) {
+            const totalText = total.toFixed(1) + ' horas';
+            const display = document.getElementById('totalDisplay');
+            if (!display) {
+                const div = document.createElement('div');
+                div.id = 'totalDisplay';
+                div.className = 'alert alert-info mt-2';
+                div.innerHTML = '<strong>Total: ' + totalText + '</strong>';
+                document.querySelector('form').appendChild(div);
+            } else {
+                display.innerHTML = '<strong>Total: ' + totalText + '</strong>';
+            }
+        }
+    }
+    
+    document.getElementById('horas').addEventListener('input', atualizarTotal);
+    document.getElementById('minutos').addEventListener('input', atualizarTotal);
+});
+</script>
+
+{% endblock %}

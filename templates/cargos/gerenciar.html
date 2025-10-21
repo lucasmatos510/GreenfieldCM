@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Cargos{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="text-warning"><i class="fas fa-briefcase me-2"></i>Gerenciar Cargos</h2>
+        <p class="text-muted">Administração de cargos e funções da empresa</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Formulário Novo Cargo -->
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Novo Cargo</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('main.criar_cargo') }}">
+                    <div class="mb-3">
+                        <label for="nome" class="form-label">Nome do Cargo</label>
+                        <input type="text" class="form-control" id="nome" name="nome" 
+                               placeholder="Ex: Desenvolvedor, Analista..." required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="area_id" class="form-label">Área de Atuação</label>
+                        <select class="form-select" id="area_id" name="area_id">
+                            <option value="">Sem área específica</option>
+                            {% for area in areas %}
+                            <option value="{{ area.id }}">{{ area.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="descricao" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="descricao" name="descricao" 
+                                  rows="2" placeholder="Responsabilidades do cargo..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-warning w-100">
+                        <i class="fas fa-save me-2"></i>Criar Cargo
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lista de Cargos -->
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Cargos Cadastrados ({{ cargos|length }})</h5>
+                <a href="{{ url_for('main.gerenciar_areas') }}" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-building me-1"></i>Gerenciar Áreas
+                </a>
+            </div>
+            <div class="card-body">
+                {% if cargos %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Cargo</th>
+                                    <th>Área</th>
+                                    <th>Funcionários</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cargo in cargos %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ cargo.nome }}</strong>
+                                        {% if cargo.descricao %}
+                                        <br><small class="text-muted">{{ cargo.descricao }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if cargo.area_atuacao %}
+                                            <span class="badge bg-info">{{ cargo.area_atuacao.nome }}</span>
+                                        {% else %}
+                                            <span class="text-muted">Sem área</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ cargo.funcionarios|length }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button type="button" class="btn btn-outline-primary" 
+                                                    onclick="editarCargo({{ cargo.id }}, '{{ cargo.nome }}', '{{ cargo.descricao or '' }}', {{ cargo.area_id or 'null' }})"
+                                                    title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            {% if cargo.funcionarios|length == 0 %}
+                                            <button type="button" class="btn btn-outline-danger"
+                                                    onclick="excluirCargo({{ cargo.id }}, '{{ cargo.nome }}')"
+                                                    title="Excluir">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            {% else %}
+                                            <button type="button" class="btn btn-outline-secondary" disabled
+                                                    title="Não pode excluir: há funcionários vinculados">
+                                                <i class="fas fa-lock"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-briefcase fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">Nenhum cargo cadastrado</h4>
+                        <p class="text-muted">Crie o primeiro cargo usando o formulário ao lado</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Cargo -->
+<div class="modal fade" id="editarCargoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Editar Cargo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('main.editar_cargo') }}" id="editarCargoForm">
+                <input type="hidden" id="edit_cargo_id" name="cargo_id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_nome" class="form-label">Nome do Cargo</label>
+                        <input type="text" class="form-control" id="edit_nome" name="nome" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_area_id" class="form-label">Área de Atuação</label>
+                        <select class="form-select" id="edit_area_id" name="area_id">
+                            <option value="">Sem área específica</option>
+                            {% for area in areas %}
+                            <option value="{{ area.id }}">{{ area.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_descricao" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="edit_descricao" name="descricao" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save me-2"></i>Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function editarCargo(id, nome, descricao, areaId) {
+    document.getElementById('edit_cargo_id').value = id;
+    document.getElementById('edit_nome').value = nome;
+    document.getElementById('edit_descricao').value = descricao;
+    document.getElementById('edit_area_id').value = areaId || '';
+    
+    const modal = new bootstrap.Modal(document.getElementById('editarCargoModal'));
+    modal.show();
+}
+
+function excluirCargo(id, nome) {
+    if (confirm(`Tem certeza que deseja excluir o cargo "${nome}"?\n\nEsta ação não pode ser desfeita.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ url_for("main.excluir_cargo") }}';
+        
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'cargo_id';
+        input.value = id;
+        
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+
+{% endblock %}

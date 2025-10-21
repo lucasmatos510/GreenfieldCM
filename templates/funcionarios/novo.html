@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Novo Funcionário{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-plus"></i> Novo Funcionário
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group mb-3">
+                                    <label for="nome" class="form-label">Nome Completo *</label>
+                                    <input type="text" class="form-control" id="nome" name="nome" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="cargo_id" class="form-label">Cargo *</label>
+                                    <select class="form-select" id="cargo_id" name="cargo_id" required>
+                                        <option value="">Selecione um cargo</option>
+                                        {% for cargo in cargos %}
+                                        <option value="{{ cargo.id }}">{{ cargo.nome }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="area_atuacao_id" class="form-label">Área de Atuação *</label>
+                                    <select class="form-select" id="area_atuacao_id" name="area_atuacao_id" required>
+                                        <option value="">Selecione uma área</option>
+                                        {% for area in areas %}
+                                        <option value="{{ area.id }}">{{ area.nome }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ url_for('main.listar_funcionarios') }}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i> Voltar
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Salvar Funcionário
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
