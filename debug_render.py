@@ -36,6 +36,15 @@ def debug_render_environment():
         value = os.environ.get(var, 'NÃO DEFINIDA')
         if var == 'SECRET_KEY' and value != 'NÃO DEFINIDA':
             value = f"***{value[-4:]}" if len(value) > 4 else "***"
+        elif var == 'DATABASE_URL' and value != 'NÃO DEFINIDA':
+            # Mostrar formato da URL para diagnóstico
+            if value.startswith('postgres://'):
+                print(f"   ⚠️  {var}: {value[:30]}... (FORMATO INCORRETO - precisa ser postgresql://)")
+            elif value.startswith('postgresql://'):
+                print(f"   ✅ {var}: {value[:30]}... (FORMATO CORRETO)")
+            else:
+                print(f"   ❓ {var}: {value[:30]}... (FORMATO DESCONHECIDO)")
+            continue
         print(f"   {var}: {value}")
     
     # Teste de imports críticos

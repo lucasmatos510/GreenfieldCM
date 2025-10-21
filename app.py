@@ -21,26 +21,40 @@ def create_app():
     # Configuração para produção no Render
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
     
-    # Configuração do banco de dados
+    # Configurações de ambiente
+    flask_env = os.environ.get('FLASK_ENV', 'development')
+    app.config['ENV'] = flask_env
+    app.debug = flask_env == 'development'
+    
+    # Configuração do banco de dados - ROBUSTA para Render
     database_url = os.environ.get('DATABASE_URL')
-    if database_url:
-        # Render PostgreSQL
+    
+    if database_url and database_url.strip():
+        print(f"🔗 Conectando ao banco: {database_url[:50]}...")
+        
+        # Render PostgreSQL - Corrigir formato
         if database_url.startswith('postgres://'):
             database_url = database_url.replace('postgres://', 'postgresql://', 1)
+            print("🔧 URL corrigida: postgres:// → postgresql://")
+        
         app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+        print("✅ Banco PostgreSQL configurado (Render)")
     else:
-        # Desenvolvimento local
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sistema_banco_horas.db'
+        # Fallback para desenvolvimento local ou erro no Render
+        sqlite_path = 'sqlite:///sistema_banco_horas.db'
+        app.config['SQLALCHEMY_DATABASE_URI'] = sqlite_path
+        
+        if flask_env == 'production':
+            print("⚠️  WARNING: DATABASE_URL não encontrada no Render!")
+            print("📋 Configure a variável DATABASE_URL nas Environment Variables")
+            print("🗄️  Usando SQLite como fallback (não recomendado em produção)")
+        else:
+            print("💾 Usando SQLite para desenvolvimento local")
     
     # Configurações gerais
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['WTF_CSRF_ENABLED'] = True
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
-    
-    # Configurações de ambiente
-    flask_env = os.environ.get('FLASK_ENV', 'development')
-    app.config['ENV'] = flask_env
-    app.debug = flask_env == 'development'
     
     # Configurar logging
     if not app.debug:
