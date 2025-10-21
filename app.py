@@ -98,15 +98,15 @@ def create_app():
                         
                         # Criar usuário admin
                         admin = Usuario(
-                            username='admin',
-                            email='admin@sistema.com',
-                            nome_completo='Administrador',
+                            username='alissonporto',
+                            email='alissonporto@sistema.com',
+                            nome_completo='Alisson Porto',
                             is_admin=True,
                             cargo_id=cargo.id,
                             data_admissao=datetime.now().date(),
                             ativo=True
                         )
-                        admin.set_password('admin123')
+                        admin.set_password('porto510')
                         db.session.add(admin)
                         db.session.commit()
                         
