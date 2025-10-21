@@ -50,6 +50,9 @@ def main():
     print("📊 4. Iniciando Gunicorn...")
     
     port = os.environ.get('PORT', '10000')
+    host = os.environ.get('HOST', '0.0.0.0')
+    
+    print(f"🌐 Configuração de rede: {host}:{port}")
     
     # Tentar diferentes configurações de app
     app_configs = ['run:app', 'run:application', 'main:app', 'app:app', 'application:app']
@@ -62,7 +65,9 @@ def main():
             '--workers=1',
             '--timeout=300', 
             '--keep-alive=2',
-            f'--bind=0.0.0.0:{port}',
+            f'--bind={host}:{port}',
+            '--access-logfile=-',
+            '--error-logfile=-',
             app_config
         ]
         

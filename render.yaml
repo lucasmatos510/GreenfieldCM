@@ -10,6 +10,10 @@ services:
         value: production
       - key: FLASK_APP
         value: app.py
+      - key: PORT
+        value: 10000
+      - key: HOST
+        value: 0.0.0.0
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
