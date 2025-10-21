@@ -15,10 +15,18 @@ sys.path.insert(0, current_dir)
 import importlib.util
 
 def get_flask_app():
-    """Importa e retorna a aplicação Flask do app.py"""
+    """Importa e retorna a aplicação Flask do app.py com múltiplos fallbacks"""
+    
+    print("🔄 Iniciando importação da aplicação Flask...")
+    
+    # Método 1: Importlib (preferido)
     try:
-        # Usar importlib para importar diretamente do arquivo app.py
+        print("📝 Tentativa 1: Usando importlib...")
         app_path = os.path.join(current_dir, "app.py")
+        
+        if not os.path.exists(app_path):
+            raise FileNotFoundError(f"Arquivo app.py não encontrado em: {app_path}")
+        
         spec = importlib.util.spec_from_file_location("main_app", app_path)
         
         if spec is None or spec.loader is None:
@@ -27,12 +35,78 @@ def get_flask_app():
         main_app_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(main_app_module)
         
-        # Retornar a instância da aplicação Flask
-        return main_app_module.app
+        if not hasattr(main_app_module, 'app'):
+            raise AttributeError("Módulo app.py não possui atributo 'app'")
+        
+        flask_app = main_app_module.app
+        print("✅ Importação com importlib bem-sucedida!")
+        return flask_app
         
     except Exception as e:
-        print(f"❌ Erro ao importar aplicação Flask: {e}")
-        raise
+        print(f"❌ Método 1 falhou: {e}")
+    
+    # Método 2: Exec direto
+    try:
+        print("📝 Tentativa 2: Usando exec...")
+        app_path = os.path.join(current_dir, "app.py")
+        
+        namespace = {
+            '__file__': app_path,
+            '__name__': '__main__',
+            '__package__': None
+        }
+        
+        with open(app_path, 'r', encoding='utf-8') as f:
+            code = f.read()
+        
+        exec(code, namespace)
+        
+        if 'app' not in namespace:
+            raise AttributeError("Variável 'app' não encontrada após exec")
+        
+        flask_app = namespace['app']
+        print("✅ Importação com exec bem-sucedida!")
+        return flask_app
+        
+    except Exception as e:
+        print(f"❌ Método 2 falhou: {e}")
+    
+    # Método 3: Import direto com sys.path
+    try:
+        print("📝 Tentativa 3: Import direto...")
+        
+        # Remover módulo se já carregado
+        if 'app' in sys.modules:
+            del sys.modules['app']
+        
+        # Temporariamente renomear pasta app/ se existir
+        app_dir = os.path.join(current_dir, 'app')
+        temp_dir = os.path.join(current_dir, 'app_backup_temp')
+        renamed = False
+        
+        if os.path.isdir(app_dir):
+            os.rename(app_dir, temp_dir)
+            renamed = True
+        
+        try:
+            import app as app_module
+            flask_app = app_module.app
+            print("✅ Importação direta bem-sucedida!")
+            return flask_app
+        finally:
+            # Restaurar pasta
+            if renamed and os.path.isdir(temp_dir):
+                os.rename(temp_dir, app_dir)
+        
+    except Exception as e:
+        print(f"❌ Método 3 falhou: {e}")
+    
+    # Se chegou até aqui, todos os métodos falharam
+    raise RuntimeError(
+        "❌ ERRO CRÍTICO: Não foi possível importar a aplicação Flask por nenhum método!\n"
+        f"📁 Diretório atual: {current_dir}\n"
+        f"📄 Arquivos disponíveis: {os.listdir(current_dir)}"
+    )
 
 # Criar instância da aplicação
 app = get_flask_app()
