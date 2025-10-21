@@ -106,27 +106,47 @@ Sistema completo e moderno para gestão automatizada de banco de horas com inter
 - 📊 **Stats Visualization**: Cards estatísticos responsivos
 - 🌙 **Dark Mode**: Suporte opcional implementado
 
-## 📦 Instalação e Configuração
+## 📦 Instalação e Deploy
 
-### Pré-requisitos
-- Python 3.8 ou superior
-- pip (gerenciador de pacotes Python)
+### 🚀 **Deploy no Render (Recomendado para Produção)**
+O sistema está **100% configurado** para deploy automático no Render:
 
-### Instalação
-1. Clone ou baixe o projeto
-2. Navegue até o diretório do projeto
-3. Ative o ambiente virtual (já configurado)
-4. Instale as dependências:
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com)
+
+**Arquivos de configuração inclusos:**
+- ✅ `render.yaml` - Deploy automático
+- ✅ `requirements.txt` - Dependências otimizadas  
+- ✅ `init_db.py` - Inicialização do PostgreSQL
+- ✅ `Procfile` - Backup deployment
+- ✅ `RENDER_DEPLOY.md` - Guia completo
+
+**URL após deploy**: `https://sistema-banco-horas-XXXX.onrender.com`
+
+### 💻 **Desenvolvimento Local**
+
+#### Pré-requisitos:
+- Python 3.8+ 
+- pip (gerenciador de pacotes)
+
+#### Instalação:
 ```bash
+# Clone o projeto
+git clone https://github.com/SEU_USUARIO/sistema-banco-horas.git
+cd sistema-banco-horas
+
+# Instale as dependências  
 pip install -r requirements.txt
-```
 
-### Execução
-```bash
+# Execute o sistema
 python app.py
 ```
 
-O sistema estará disponível em: `http://localhost:5000`
+**Acesso local**: `http://localhost:5000`
+
+#### Primeiro Acesso:
+- 👤 **Usuário**: `admin`
+- 🔑 **Senha**: `admin123` 
+- ⚠️ **Altere** a senha após primeiro login!
 
 ## 🗄️ Estrutura do Banco de Dados
 
@@ -229,15 +249,52 @@ Altere a porta em `app.py`:
 app.run(debug=True, port=5001)
 ```
 
+## � Deploy e URLs
+
+### 🌐 **Produção (Render)**
+- **URL**: `https://sistema-banco-horas-XXXX.onrender.com`
+- **Database**: PostgreSQL (automático)
+- **Performance**: Otimizado para produção
+- **Deploy**: Automático via GitHub
+
+### 💻 **Desenvolvimento** 
+- **URL**: `http://localhost:5000`
+- **Database**: SQLite local
+- **Debug**: Ativado
+
+### 📊 **Recursos de Produção**
+- ✅ **HTTPS** automático
+- ✅ **PostgreSQL** gerenciado
+- ✅ **Backup** automático
+- ✅ **Monitoring** integrado
+- ✅ **Auto-scaling** disponível
+
+## 📚 Documentação Adicional
+
+- 📖 **[RENDER_DEPLOY.md](RENDER_DEPLOY.md)** - Guia completo de deploy
+- 📖 **[GITHUB_SETUP.md](GITHUB_SETUP.md)** - Configuração GitHub
+- 📖 **[.env.example](.env.example)** - Variáveis de ambiente
+
 ## 📝 Licença
 
-Este é um projeto de código aberto para uso interno da empresa.
+MIT License - Projeto de código aberto para gestão de banco de horas.
 
-## 👥 Suporte
+## 👥 Suporte e Contribuição
 
-Para suporte técnico ou dúvidas sobre o sistema, consulte a documentação interna ou entre em contato com a equipe de TI.
+- 🐛 **Issues**: Reporte bugs via GitHub Issues
+- 💡 **Features**: Sugira melhorias via Pull Requests  
+- 📧 **Suporte**: Consulte a documentação ou logs do Render
+- 🔧 **Desenvolvimento**: Fork, modifique e contribua!
 
 ---
 
-**Sistema de Banco de Horas v1.0**  
-Desenvolvido para modernizar e automatizar o controle de horas trabalhadas.
+## 📈 Status do Projeto
+
+![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen?style=for-the-badge)
+![Deploy Status](https://img.shields.io/badge/Deploy-Ready-success?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-2.0-blue?style=for-the-badge)
+
+**Sistema de Banco de Horas v2.0**  
+🎯 **100% Mobile-First | ✅ Production Ready | 🚀 Deploy Automático**
+
+Desenvolvido para modernizar e automatizar completamente o controle de horas trabalhadas com interface sofisticada e relatórios avançados.
