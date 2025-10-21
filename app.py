@@ -60,6 +60,49 @@ def create_app():
     from app.models import db
     db.init_app(app)
     
+    # Criar tabelas automaticamente se não existirem
+    with app.app_context():
+        try:
+            db.create_all()
+            
+            # Criar dados iniciais se necessário (apenas em produção)
+            if flask_env == 'production':
+                from app.models import Usuario, AreaAtuacao, Cargo
+                
+                # Verificar se já existe admin
+                if not Usuario.query.filter_by(is_admin=True).first():
+                    # Criar área padrão
+                    if not AreaAtuacao.query.first():
+                        area = AreaAtuacao(nome='Tecnologia', descricao='Área de TI')
+                        db.session.add(area)
+                        db.session.flush()
+                        
+                        # Criar cargo padrão
+                        cargo = Cargo(nome='Administrador', descricao='Administrador do Sistema', area_atuacao_id=area.id)
+                        db.session.add(cargo)
+                        db.session.flush()
+                        
+                        # Criar usuário admin
+                        admin = Usuario(
+                            username='admin',
+                            email='admin@sistema.com',
+                            nome_completo='Administrador',
+                            is_admin=True,
+                            cargo_id=cargo.id,
+                            data_admissao=datetime.now().date(),
+                            ativo=True
+                        )
+                        admin.set_password('admin123')
+                        db.session.add(admin)
+                        db.session.commit()
+                        
+                        app.logger.info("Dados iniciais criados com sucesso!")
+                        
+        except Exception as e:
+            app.logger.error(f"Erro na inicialização do banco: {e}")
+            # Não falhar a aplicação por problemas de inicialização
+            pass
+    
     # Registrar blueprint de autenticação
     from app.auth import auth_bp
     app.register_blueprint(auth_bp)
