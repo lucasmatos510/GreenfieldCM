@@ -135,20 +135,35 @@ def create_app():
 # Criar aplicação
 app = create_app()
 
+# Health check endpoint para Render
+@app.route('/health')
+def health_check():
+    try:
+        # Verificar conexão com o banco
+        from app.models import db
+        db.engine.execute('SELECT 1')
+        return {'status': 'healthy', 'database': 'connected'}, 200
+    except Exception as e:
+        return {'status': 'unhealthy', 'error': str(e)}, 503
+
 # Rota inicial - redireciona para login ou setup
 @app.route('/')
 def index():
-    # Verificar se já existe um usuário admin
-    from app.models import Usuario
-    if not Usuario.query.filter_by(is_admin=True).first():
-        return redirect(url_for('auth.setup'))
-    
-    # Se não estiver logado, vai para login
-    if 'user_id' not in session:
-        return redirect(url_for('auth.login'))
-    
-    # Se estiver logado, vai para dashboard
-    return redirect(url_for('main.dashboard'))
+    try:
+        # Verificar se já existe um usuário admin
+        from app.models import Usuario
+        if not Usuario.query.filter_by(is_admin=True).first():
+            return redirect(url_for('auth.setup'))
+        
+        # Se não estiver logado, vai para login
+        if 'user_id' not in session:
+            return redirect(url_for('auth.login'))
+        
+        # Se estiver logado, vai para dashboard
+        return redirect(url_for('main.dashboard'))
+    except Exception as e:
+        app.logger.error(f"Erro na rota inicial: {e}")
+        return f"Sistema inicializando... Aguarde alguns minutos. Erro: {e}", 503
 
 if __name__ == '__main__':
     # Configuração para desenvolvimento local
