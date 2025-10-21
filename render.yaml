@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: sistema-banco-horas
+    env: python
+    plan: free
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+      python init_db.py
+    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_APP
+        value: app.py
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sistema-banco-horas-db
+          property: connectionString
+    healthCheckPath: /
+    
+  - type: pserv
+    name: sistema-banco-horas-db
+    plan: free
+    databaseName: sistema_banco_horas
+    user: sistema_user
+
+# Build settings
+buildSettings:
+  buildCommand: |
+    echo "🔧 Instalando dependências..."
+    pip install --upgrade pip setuptools wheel
+    pip install -r requirements.txt
+    echo "📊 Criando estrutura do banco..."
+    python init_db.py
+    echo "✅ Build concluído com sucesso!"

@@ -1,28 +1,47 @@
 """
 Sistema de Banco de Horas - Aplicação Principal
 Sistema completo e otimizado para controle de horas trabalhadas.
+Configurado para deploy no Render com PostgreSQL.
 """
 
 from flask import Flask, render_template, redirect, url_for, session
 import os
 import logging
 from datetime import datetime
-from config import config
+from dotenv import load_dotenv
 
-def create_app(config_name=None):
-    """Factory function para criar a aplicação Flask"""
-    
-    # Determinar ambiente
-    if config_name is None:
-        config_name = os.environ.get('FLASK_CONFIG', 'development')
+# Carregar variáveis de ambiente
+load_dotenv()
+
+def create_app():
+    """Factory function para criar a aplicação Flask otimizada para Render"""
     
     # Criar aplicação
     app = Flask(__name__)
-    app.config.from_object(config[config_name])
     
-    # Garantir que SECRET_KEY está definida
-    if not app.config.get('SECRET_KEY'):
-        app.config['SECRET_KEY'] = 'super-secret-key-for-development'
+    # Configuração para produção no Render
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
+    
+    # Configuração do banco de dados
+    database_url = os.environ.get('DATABASE_URL')
+    if database_url:
+        # Render PostgreSQL
+        if database_url.startswith('postgres://'):
+            database_url = database_url.replace('postgres://', 'postgresql://', 1)
+        app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    else:
+        # Desenvolvimento local
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sistema_banco_horas.db'
+    
+    # Configurações gerais
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['WTF_CSRF_ENABLED'] = True
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
+    
+    # Configurações de ambiente
+    flask_env = os.environ.get('FLASK_ENV', 'development')
+    app.config['ENV'] = flask_env
+    app.debug = flask_env == 'development'
     
     # Configurar logging
     if not app.debug:
@@ -90,7 +109,7 @@ def index():
     return redirect(url_for('main.dashboard'))
 
 if __name__ == '__main__':
-    # Criar tabelas se não existirem
+    # Configuração para desenvolvimento local
     with app.app_context():
         from app.models import db
         db.create_all()
@@ -101,10 +120,15 @@ if __name__ == '__main__':
         print("📊 Dashboard disponível em: http://127.0.0.1:5000")
         print("📈 Relatórios disponíveis em: http://127.0.0.1:5000/relatorios")
     
+    # Configuração de execução baseada no ambiente
+    port = int(os.environ.get('PORT', 5000))
+    host = os.environ.get('HOST', '127.0.0.1')
+    debug = os.environ.get('FLASK_ENV', 'development') == 'development'
+    
     # Executar aplicação
     app.run(
-        host='127.0.0.1',
-        port=5000,
-        debug=True,
-        use_reloader=True
+        host=host,
+        port=port,
+        debug=debug,
+        use_reloader=debug
     )
