@@ -3,11 +3,8 @@ services:
     name: sistema-banco-horas
     env: python
     plan: free
-    buildCommand: |
-      pip install --upgrade pip
-      pip install -r requirements.txt
-      python init_db.py
-    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: python init_db.py && gunicorn --bind 0.0.0.0:$PORT app:app
     envVars:
       - key: FLASK_ENV
         value: production
