@@ -27,7 +27,7 @@ def init_database():
     
     with app.app_context():
         print("📊 Importando modelos...")
-        from app.models import db, Usuario, AreaAtuacao, Cargo
+        from flask_app.models import db, Usuario, AreaAtuacao, Cargo
         
         print("🗄️ Criando tabelas...")
         try:

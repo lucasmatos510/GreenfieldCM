@@ -2,7 +2,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from datetime import datetime, date, timedelta
-from app.models import RegistroHora, Funcionario
+from flask_app.models import RegistroHora, Funcionario
 import tempfile
 import os
 

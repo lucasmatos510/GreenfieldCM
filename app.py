@@ -57,7 +57,7 @@ def create_app():
         app.logger.info('Sistema de Banco de Horas iniciado')
     
     # Inicializar extensões
-    from app.models import db
+    from flask_app.models import db
     db.init_app(app)
     
     # Criar tabelas automaticamente se não existirem
@@ -67,7 +67,7 @@ def create_app():
             
             # Criar dados iniciais se necessário (apenas em produção)
             if flask_env == 'production':
-                from app.models import Usuario, AreaAtuacao, Cargo
+                from flask_app.models import Usuario, AreaAtuacao, Cargo
                 
                 # Verificar se já existe admin
                 if not Usuario.query.filter_by(is_admin=True).first():
@@ -104,11 +104,11 @@ def create_app():
             pass
     
     # Registrar blueprint de autenticação
-    from app.auth import auth_bp
+    from flask_app.auth import auth_bp
     app.register_blueprint(auth_bp)
     
     # Registrar rotas
-    from app.routes import init_routes
+    from flask_app.routes import init_routes
     init_routes(app)
     
     # Configurar handlers de erro customizados
@@ -145,7 +145,7 @@ flask_app = app    # Backup adicional
 def health_check():
     try:
         # Verificar conexão com o banco
-        from app.models import db
+        from flask_app.models import db
         db.engine.execute('SELECT 1')
         return {'status': 'healthy', 'database': 'connected'}, 200
     except Exception as e:
@@ -156,7 +156,7 @@ def health_check():
 def index():
     try:
         # Verificar se já existe um usuário admin
-        from app.models import Usuario
+        from flask_app.models import Usuario
         if not Usuario.query.filter_by(is_admin=True).first():
             return redirect(url_for('auth.setup'))
         
@@ -173,7 +173,7 @@ def index():
 if __name__ == '__main__':
     # Configuração para desenvolvimento local
     with app.app_context():
-        from app.models import db
+        from flask_app.models import db
         db.create_all()
         
         # Log de inicialização

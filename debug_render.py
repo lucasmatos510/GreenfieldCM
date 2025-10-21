@@ -68,7 +68,7 @@ def debug_render_environment():
     try:
         from main import app
         with app.app_context():
-            from app.models import db
+            from flask_app.models import db
             db.engine.execute('SELECT 1')
             print(f"   ✅ Conexão com banco OK!")
     except Exception as e:

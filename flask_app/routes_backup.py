@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, send_file
 from datetime import datetime, date, timedelta
-from app.models import db, Funcionario, Cargo, AreaAtuacao, RegistroHora, ResumoDiario
-from app.utils import gerar_relatorio_excel
-from app.auth import login_required
+from flask_app.models import db, Funcionario, Cargo, AreaAtuacao, RegistroHora, ResumoDiario
+from flask_app.utils import gerar_relatorio_excel
+from flask_app.auth import login_required
 import json
 import logging
 import os
@@ -803,7 +803,7 @@ def init_routes(app):
                 return redirect(url_for('relatorios'))
             
             # Gerar relatório
-            from app.utils import gerar_relatorio_excel
+            from flask_app.utils import gerar_relatorio_excel
             arquivo = gerar_relatorio_excel(tipo, funcionario_id, mes, ano)
             
             if not arquivo:
@@ -880,7 +880,7 @@ def init_routes(app):
             data_fim = datetime.strptime(data_fim_str, '%Y-%m-%d').date() if data_fim_str else data_inicio
             
             # Gerar resumos
-            from app.models import ResumoDiario
+            from flask_app.models import ResumoDiario
             resumos = ResumoDiario.gerar_resumos_periodo(data_inicio, data_fim)
             
             dias = (data_fim - data_inicio).days + 1
@@ -899,7 +899,7 @@ def init_routes(app):
         """Processa resumos diários automaticamente para os últimos 30 dias"""
         try:
             from datetime import date, timedelta
-            from app.models import ResumoDiario
+            from flask_app.models import ResumoDiario
             
             # Processar últimos 30 dias
             data_fim = date.today()
@@ -919,7 +919,7 @@ def init_routes(app):
     def visualizar_resumos():
         """Visualiza resumos diários gerados"""
         try:
-            from app.models import ResumoDiario
+            from flask_app.models import ResumoDiario
             
             # Parâmetros de filtro
             funcionario_id = request.args.get('funcionario_id')
