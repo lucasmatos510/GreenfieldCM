@@ -135,6 +135,11 @@ def create_app():
 # Criar aplicação
 app = create_app()
 
+# EMERGÊNCIA: Expor app no namespace global para Gunicorn app:app
+# Esta linha garante que 'app' esteja disponível mesmo com conflitos
+application = app  # Gunicorn também aceita 'application'
+flask_app = app    # Backup adicional
+
 # Health check endpoint para Render
 @app.route('/health')
 def health_check():
